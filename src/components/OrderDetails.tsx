@@ -1,4 +1,5 @@
-import { useReducer } from "react";
+import { useReducer, useState } from "react";
+import { getStaticVenueInfo, getDynamicVenueInfo } from "../api/venues";
 
 type FormField = {
   label: string;
@@ -48,6 +49,7 @@ function OrderDetails() {
     calculatorFormReducer,
     initialFormState
   );
+  const [venueInfo, setVenueInfo] = useState({});
 
   const formFields: FormField[] = [
     { label: "Venue slug", inputType: "text", id: "venueSlug" },
@@ -105,14 +107,39 @@ function OrderDetails() {
     }
   };
 
-  console.log(calculatorFormState);
+  const handleSubmit = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    const staticVenueInfo = await getStaticVenueInfo(
+      calculatorFormState.venueSlug
+    );
+    const dynamicVenueInfo = await getDynamicVenueInfo(
+      calculatorFormState.venueSlug
+    );
+
+    const { coordinates } = staticVenueInfo.venue_raw.location;
+    const {
+      order_minimum_no_surcharge,
+      delivery_pricing: { base_price, distance_ranges },
+    } = dynamicVenueInfo.venue_raw.delivery_specs;
+
+    setVenueInfo({
+      venueLatitude: coordinates[1],
+      venueLongitude: coordinates[0],
+      orderMinimumNoSurcharge: order_minimum_no_surcharge,
+      basePrice: base_price,
+      distanceRanges: distance_ranges,
+    });
+  };
+
   return (
     <div>
       <h4>Order Details</h4>
       <form>
         {formFieldContent}
         <button onClick={getUserCoordinates}>Get location</button>
-        <button>Calculate delivery fee</button>
+        <button onClick={handleSubmit}>Calculate delivery fee</button>
       </form>
     </div>
   );
