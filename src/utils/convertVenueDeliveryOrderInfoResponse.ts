@@ -1,27 +1,5 @@
-interface VenueDeliveryOrderInfoResponse {
-    coordinates: number[];
-    order_minimum_no_surcharge: number;
-    base_price: number;
-    distance_ranges: {
-        min: number;
-        max: number;
-        a: number;
-        b: number;
-    }[]
-}
-
-interface VenueDeliveryOrderInfo {
-    venueLatitude: number;
-    venueLongitude: number;
-    orderMinimumNoSurcharge: number;
-    basePrice: number;
-    distanceRanges: {
-        min: number;
-        max: number;
-        a: number;
-        b: number;
-    }[]
-}
+import { VenueDeliveryOrderInfoResponse } from "../common/api.types"
+import { VenueDeliveryOrderInfo } from "../common/internal"
 
 export const convertVenueInfoResponse = (venueDeliveryOrderInfoResponse: VenueDeliveryOrderInfoResponse): VenueDeliveryOrderInfo => {
     return {

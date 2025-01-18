@@ -4,47 +4,31 @@ import { calculateDeliveryFee } from "../utils/calculateDeliveryFee";
 import { calculateDeliveryDistance } from "../utils/calculateDeliveryDistance";
 import {
   convertEuroToCent,
-  convertCentToEuroString,
   convertCentToEuro,
 } from "../utils/convertEuroCurrencyUnit";
+import { getUserCoordinates } from "../utils/getUserCoordinates";
+import {
+  FormField,
+  OrderDetailsFormActionKind,
+  OrderDetailsFormAction,
+  OrderDetailsFormState,
+} from "./OrderDetails.types";
 
-type FormField = {
-  label: string;
-  inputType: string;
-  id: keyof CalculatorFormState;
-};
-
-interface CalculatorFormState {
-  venueSlug: string;
-  cartValue: number;
-  userLatitude: number;
-  userLongitude: number;
-}
-
-const initialFormState: CalculatorFormState = {
+const initialOrderDetailsFormState: OrderDetailsFormState = {
   venueSlug: "",
-  cartValue: 0,
-  userLatitude: 0,
-  userLongitude: 0,
+  cartValue: null,
+  userLatitude: null,
+  userLongitude: null,
 };
 
-enum CalculatorFormActionKind {
-  HANDLE_INPUT = "handle_input",
-}
-
-interface CalculatorFormInputAction {
-  type: CalculatorFormActionKind.HANDLE_INPUT;
-  field: string;
-  payload: string | number;
-}
-
-type CalculatorFormAction = CalculatorFormInputAction;
-
-const calculatorFormReducer = (
-  state: CalculatorFormState,
-  action: CalculatorFormAction
+const orderDetailsFormReducer = (
+  state: OrderDetailsFormState,
+  action: OrderDetailsFormAction
 ) => {
-  if (action.type === CalculatorFormActionKind.HANDLE_INPUT) {
+  if (
+    action.type === OrderDetailsFormActionKind.HANDLE_STRING_INPUT ||
+    action.type === OrderDetailsFormActionKind.HANDLE_NUMBER_INPUT
+  ) {
     return { ...state, [action.field]: action.payload };
   }
 
@@ -52,18 +36,21 @@ const calculatorFormReducer = (
 };
 
 function OrderDetails() {
-  const [calculatorFormState, dispatch] = useReducer(
-    calculatorFormReducer,
-    initialFormState
+  const [orderDetailsFormState, dispatch] = useReducer(
+    orderDetailsFormReducer,
+    initialOrderDetailsFormState
   );
 
   const [deliveryOrderPrice, setDeliveryOrderPrice] = useState({
-    cartValue: "",
-    smallOrderSurcharge: "",
-    deliveryFee: "",
+    cartValue: 0,
+    smallOrderSurcharge: 0,
+    deliveryFee: 0,
     deliveryDistance: 0,
-    totalPrice: "",
+    totalPrice: 0,
   });
+
+  const [shouldShowDeliveryDistanceAlert, setShouldShowDeliveryDistanceAlert] =
+    useState(false);
 
   const formFields: FormField[] = [
     { label: "Venue slug", inputType: "text", id: "venueSlug" },
@@ -74,32 +61,52 @@ function OrderDetails() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    if (id === "cartValue") {
+
+    if (id === "venueSlug") {
       dispatch({
-        type: CalculatorFormActionKind.HANDLE_INPUT,
+        type: OrderDetailsFormActionKind.HANDLE_STRING_INPUT,
         field: id,
-        payload: convertEuroToCent(Number(value)),
+        payload: value,
+      });
+    } else if (id === "cartValue") {
+      dispatch({
+        type: OrderDetailsFormActionKind.HANDLE_NUMBER_INPUT,
+        field: id,
+        payload: value !== "" ? convertEuroToCent(Number(value)) : null,
       });
     } else {
       dispatch({
-        type: CalculatorFormActionKind.HANDLE_INPUT,
+        type: OrderDetailsFormActionKind.HANDLE_NUMBER_INPUT,
         field: id,
-        payload: id === "venueSlug" ? value : Number(value),
+        payload: value !== "" ? Number(value) : null,
       });
     }
   };
 
+  // To-do: Refactor to a reusable Input component to include validation feedback
   const formFieldContent = formFields.map((field) => {
-    const isCartValue = field.id === "cartValue";
+    const inputValue = orderDetailsFormState[field.id];
+    let formattedInputValue;
+    if (field.id === "venueSlug") {
+      formattedInputValue = inputValue || "";
+    }
+
+    if (field.id === "cartValue") {
+      formattedInputValue =
+        inputValue !== null ? convertCentToEuro(inputValue as number) : "";
+    }
+
+    if (field.id === "userLatitude" || field.id === "userLongitude") {
+      formattedInputValue = inputValue !== null ? inputValue : "";
+    }
+
     return (
       <div key={field.label}>
         <label htmlFor={field.id}>{field.label}</label>
+        {/* To-do: Add min limit to input to prevent negative value */}
         <input
-          value={
-            isCartValue
-              ? convertCentToEuro(calculatorFormState[field.id] as number)
-              : calculatorFormState[field.id]
-          }
+          required
+          value={formattedInputValue}
           type={field.inputType}
           id={field.id}
           data-test-id={field.id}
@@ -109,37 +116,38 @@ function OrderDetails() {
     );
   });
 
-  const getUserCoordinates = (
+  const handleClick = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    e.preventDefault();
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        const { latitude, longitude } = position.coords;
+    try {
+      e.preventDefault();
+      const { latitude, longitude } = await getUserCoordinates();
 
-        dispatch({
-          type: CalculatorFormActionKind.HANDLE_INPUT,
-          field: "userLatitude",
-          payload: latitude,
-        });
-
-        dispatch({
-          type: CalculatorFormActionKind.HANDLE_INPUT,
-          field: "userLongitude",
-          payload: longitude,
-        });
+      dispatch({
+        type: OrderDetailsFormActionKind.HANDLE_NUMBER_INPUT,
+        field: "userLatitude",
+        payload: latitude,
       });
-    } else {
-      console.log("Geolocation is not supported by this browser.");
+
+      dispatch({
+        type: OrderDetailsFormActionKind.HANDLE_NUMBER_INPUT,
+        field: "userLongitude",
+        payload: longitude,
+      });
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  const handleSubmit = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
-      const venueInfo = await getVenueInfo(calculatorFormState.venueSlug);
+      e.preventDefault();
+      const { venueSlug, cartValue, userLatitude, userLongitude } =
+        orderDetailsFormState;
+      // To-do: Handle missing field and case where number inputs are 0
+      if (!venueSlug || !cartValue || !userLatitude || !userLongitude) return;
+
+      const venueInfo = await getVenueInfo(venueSlug);
 
       const deliveryDistance = calculateDeliveryDistance(
         {
@@ -147,33 +155,33 @@ function OrderDetails() {
           longitude: venueInfo.venueLongitude,
         },
         {
-          latitude: calculatorFormState.userLatitude,
-          longitude: calculatorFormState.userLongitude,
+          latitude: userLatitude,
+          longitude: userLongitude,
         }
       );
 
-      const deliveryFee = calculateDeliveryFee(
+      const { distanceOutOfDeliveryRange, deliveryFee } = calculateDeliveryFee(
         venueInfo.distanceRanges,
         deliveryDistance,
         venueInfo.basePrice
       );
 
+      setShouldShowDeliveryDistanceAlert(distanceOutOfDeliveryRange);
+
       const smallOrderSurcharge =
-        venueInfo.orderMinimumNoSurcharge > calculatorFormState.cartValue
-          ? venueInfo.orderMinimumNoSurcharge - calculatorFormState.cartValue
+        venueInfo.orderMinimumNoSurcharge > cartValue
+          ? venueInfo.orderMinimumNoSurcharge - cartValue
           : 0;
 
-      const totalPrice =
-        calculatorFormState.cartValue + smallOrderSurcharge + deliveryFee;
+      const totalPrice = cartValue + smallOrderSurcharge + deliveryFee;
 
       const deliveryOrderPrice = {
-        cartValue: convertCentToEuroString(calculatorFormState.cartValue),
-        smallOrderSurcharge: convertCentToEuroString(smallOrderSurcharge),
-        deliveryFee: convertCentToEuroString(deliveryFee),
+        cartValue,
+        smallOrderSurcharge,
+        deliveryFee,
         deliveryDistance,
-        totalPrice: convertCentToEuroString(totalPrice),
+        totalPrice,
       };
-
       setDeliveryOrderPrice(deliveryOrderPrice);
     } catch (error) {
       console.error(error);
@@ -183,12 +191,18 @@ function OrderDetails() {
   return (
     <div>
       <h4>Order Details</h4>
-      <form>
+      <form onSubmit={handleSubmit}>
         {formFieldContent}
-        <button onClick={getUserCoordinates}>Get location</button>
-        <button onClick={handleSubmit}>Calculate delivery fee</button>
+        <button onClick={handleClick} value="Get location">
+          Get location
+        </button>
+        <button value="Calculate delivery fee">Calculate delivery fee</button>
       </form>
 
+      <div>
+        {shouldShowDeliveryDistanceAlert &&
+          "Cannot calculate delivery fee. The location is outside of the delivery range."}
+      </div>
       <div>Cart Value: {deliveryOrderPrice.cartValue} EUR</div>
       <div>Delivery Fee: {deliveryOrderPrice.deliveryFee} EUR</div>
       <div>Distance: {deliveryOrderPrice.deliveryDistance} m</div>

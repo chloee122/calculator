@@ -1,24 +1,20 @@
+import { VenueDeliveryOrderInfo } from "../common/internal";
+
 export const calculateDeliveryFee = (
-    distanceRanges: {
-        min: number;
-        max: number;
-        a: number;
-        b: number;
-    }[],
+    distanceRanges: VenueDeliveryOrderInfo["distanceRanges"],
     deliveryDistance: number,
     basePrice: number
-): number => {
-    const maxRange = distanceRanges[distanceRanges.length - 2];
-    let a = maxRange.a;
-    let b = maxRange.b;
+): { distanceOutOfDeliveryRange: boolean, deliveryFee: number } => {
+    let distanceOutOfDeliveryRange = true;
 
     for (let i = 0; i < distanceRanges.length; i++) {
-        if (deliveryDistance < distanceRanges[i].max) {
-            a = distanceRanges[i].a;
-            b = distanceRanges[i].b;
-            return Math.ceil(basePrice + a + (b * deliveryDistance) / 10);
+        if (deliveryDistance >= 0 && deliveryDistance < distanceRanges[i].max) {
+            const { a, b } = distanceRanges[i];
+
+            distanceOutOfDeliveryRange = false;
+            return { distanceOutOfDeliveryRange, deliveryFee: Math.ceil(basePrice + a + (b * deliveryDistance) / 10) };
         }
     }
 
-    return Math.ceil(basePrice + a + (b * deliveryDistance) / 10);
+    return { distanceOutOfDeliveryRange, deliveryFee: 0 }
 };
