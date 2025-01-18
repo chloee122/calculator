@@ -1,5 +1,12 @@
 import { useReducer, useState } from "react";
-import { getStaticVenueInfo, getDynamicVenueInfo } from "../api/venues";
+import { getVenueInfo } from "../api/venues";
+import { calculateDeliveryFee } from "../utils/calculateDeliveryFee";
+import { calculateDeliveryDistance } from "../utils/calculateDeliveryDistance";
+import {
+  convertEuroToCent,
+  convertCentToEuroString,
+  convertCentToEuro,
+} from "../utils/convertEuroCurrencyUnit";
 
 type FormField = {
   label: string;
@@ -49,7 +56,14 @@ function OrderDetails() {
     calculatorFormReducer,
     initialFormState
   );
-  const [venueInfo, setVenueInfo] = useState({});
+
+  const [deliveryOrderPrice, setDeliveryOrderPrice] = useState({
+    cartValue: "",
+    smallOrderSurcharge: "",
+    deliveryFee: "",
+    deliveryDistance: 0,
+    totalPrice: "",
+  });
 
   const formFields: FormField[] = [
     { label: "Venue slug", inputType: "text", id: "venueSlug" },
@@ -60,19 +74,32 @@ function OrderDetails() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    dispatch({
-      type: CalculatorFormActionKind.HANDLE_INPUT,
-      field: id,
-      payload: id === "venueSlug" ? value : Number(value),
-    });
+    if (id === "cartValue") {
+      dispatch({
+        type: CalculatorFormActionKind.HANDLE_INPUT,
+        field: id,
+        payload: convertEuroToCent(Number(value)),
+      });
+    } else {
+      dispatch({
+        type: CalculatorFormActionKind.HANDLE_INPUT,
+        field: id,
+        payload: id === "venueSlug" ? value : Number(value),
+      });
+    }
   };
 
   const formFieldContent = formFields.map((field) => {
+    const isCartValue = field.id === "cartValue";
     return (
       <div key={field.label}>
         <label htmlFor={field.id}>{field.label}</label>
         <input
-          value={calculatorFormState[field.id]}
+          value={
+            isCartValue
+              ? convertCentToEuro(calculatorFormState[field.id] as number)
+              : calculatorFormState[field.id]
+          }
           type={field.inputType}
           id={field.id}
           data-test-id={field.id}
@@ -111,26 +138,46 @@ function OrderDetails() {
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.preventDefault();
-    const staticVenueInfo = await getStaticVenueInfo(
-      calculatorFormState.venueSlug
-    );
-    const dynamicVenueInfo = await getDynamicVenueInfo(
-      calculatorFormState.venueSlug
-    );
+    try {
+      const venueInfo = await getVenueInfo(calculatorFormState.venueSlug);
 
-    const { coordinates } = staticVenueInfo.venue_raw.location;
-    const {
-      order_minimum_no_surcharge,
-      delivery_pricing: { base_price, distance_ranges },
-    } = dynamicVenueInfo.venue_raw.delivery_specs;
+      const deliveryDistance = calculateDeliveryDistance(
+        {
+          latitude: venueInfo.venueLatitude,
+          longitude: venueInfo.venueLongitude,
+        },
+        {
+          latitude: calculatorFormState.userLatitude,
+          longitude: calculatorFormState.userLongitude,
+        }
+      );
 
-    setVenueInfo({
-      venueLatitude: coordinates[1],
-      venueLongitude: coordinates[0],
-      orderMinimumNoSurcharge: order_minimum_no_surcharge,
-      basePrice: base_price,
-      distanceRanges: distance_ranges,
-    });
+      const deliveryFee = calculateDeliveryFee(
+        venueInfo.distanceRanges,
+        deliveryDistance,
+        venueInfo.basePrice
+      );
+
+      const smallOrderSurcharge =
+        venueInfo.orderMinimumNoSurcharge > calculatorFormState.cartValue
+          ? venueInfo.orderMinimumNoSurcharge - calculatorFormState.cartValue
+          : 0;
+
+      const totalPrice =
+        calculatorFormState.cartValue + smallOrderSurcharge + deliveryFee;
+
+      const deliveryOrderPrice = {
+        cartValue: convertCentToEuroString(calculatorFormState.cartValue),
+        smallOrderSurcharge: convertCentToEuroString(smallOrderSurcharge),
+        deliveryFee: convertCentToEuroString(deliveryFee),
+        deliveryDistance,
+        totalPrice: convertCentToEuroString(totalPrice),
+      };
+
+      setDeliveryOrderPrice(deliveryOrderPrice);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -141,6 +188,14 @@ function OrderDetails() {
         <button onClick={getUserCoordinates}>Get location</button>
         <button onClick={handleSubmit}>Calculate delivery fee</button>
       </form>
+
+      <div>Cart Value: {deliveryOrderPrice.cartValue} EUR</div>
+      <div>Delivery Fee: {deliveryOrderPrice.deliveryFee} EUR</div>
+      <div>Distance: {deliveryOrderPrice.deliveryDistance} m</div>
+      <div>
+        Small Order Surcharge: {deliveryOrderPrice.smallOrderSurcharge} EUR
+      </div>
+      <div>Total: {deliveryOrderPrice.totalPrice} EUR</div>
     </div>
   );
 }
