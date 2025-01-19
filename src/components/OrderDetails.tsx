@@ -13,6 +13,7 @@ import {
   OrderDetailsFormAction,
   OrderDetailsFormState,
 } from "./OrderDetails.types";
+import { DeliveryOrderPrice } from "../common/internal";
 
 const initialOrderDetailsFormState: OrderDetailsFormState = {
   venueSlug: "",
@@ -35,19 +36,15 @@ const orderDetailsFormReducer = (
   return state;
 };
 
-function OrderDetails() {
+interface OrderDetailsProps {
+  setDeliveryOrderPrice: (deliveryOrderPrice: DeliveryOrderPrice) => void;
+}
+
+function OrderDetails({ setDeliveryOrderPrice }: OrderDetailsProps) {
   const [orderDetailsFormState, dispatch] = useReducer(
     orderDetailsFormReducer,
     initialOrderDetailsFormState
   );
-
-  const [deliveryOrderPrice, setDeliveryOrderPrice] = useState({
-    cartValue: 0,
-    smallOrderSurcharge: 0,
-    deliveryFee: 0,
-    deliveryDistance: 0,
-    totalPrice: 0,
-  });
 
   const [shouldShowDeliveryDistanceAlert, setShouldShowDeliveryDistanceAlert] =
     useState(false);
@@ -185,6 +182,7 @@ function OrderDetails() {
       setDeliveryOrderPrice(deliveryOrderPrice);
     } catch (error) {
       console.error(error);
+      // To-do: Handle case where venue slug is not found
     }
   };
 
@@ -203,13 +201,7 @@ function OrderDetails() {
         {shouldShowDeliveryDistanceAlert &&
           "Cannot calculate delivery fee. The location is outside of the delivery range."}
       </div>
-      <div>Cart Value: {deliveryOrderPrice.cartValue} EUR</div>
-      <div>Delivery Fee: {deliveryOrderPrice.deliveryFee} EUR</div>
-      <div>Distance: {deliveryOrderPrice.deliveryDistance} m</div>
-      <div>
-        Small Order Surcharge: {deliveryOrderPrice.smallOrderSurcharge} EUR
-      </div>
-      <div>Total: {deliveryOrderPrice.totalPrice} EUR</div>
+     
     </div>
   );
 }

@@ -10,3 +10,11 @@ export interface VenueDeliveryOrderInfo {
         b: number;
     }[]
 }
+
+export interface DeliveryOrderPrice {
+    cartValue: number;
+    smallOrderSurcharge: number;
+    deliveryFee: number;
+    deliveryDistance: number;
+    totalPrice: number;
+}
