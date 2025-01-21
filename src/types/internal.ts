@@ -18,3 +18,4 @@ export interface DeliveryOrderPrice {
     deliveryDistance: number;
     totalPrice: number;
 }
+

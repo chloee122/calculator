@@ -1,7 +1,7 @@
-import { VenueDeliveryOrderInfoResponse } from "../common/api.types"
-import { VenueDeliveryOrderInfo } from "../common/internal"
+import { VenueDeliveryOrderInfoResponse } from "../types/api.types"
+import { VenueDeliveryOrderInfo } from "../types/internal"
 
-export const convertVenueInfoResponse = (venueDeliveryOrderInfoResponse: VenueDeliveryOrderInfoResponse): VenueDeliveryOrderInfo => {
+export const convertVenueDeliveryOrderInfoResponse = (venueDeliveryOrderInfoResponse: VenueDeliveryOrderInfoResponse): VenueDeliveryOrderInfo => {
     return {
         venueLatitude: venueDeliveryOrderInfoResponse.coordinates[1],
         venueLongitude: venueDeliveryOrderInfoResponse.coordinates[0],

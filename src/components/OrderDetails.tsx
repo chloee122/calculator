@@ -1,5 +1,5 @@
 import { useReducer, useState } from "react";
-import { getVenueInfo } from "../api/venues";
+import { getVenueDeliveryOrderInfo } from "../api/venues";
 import { calculateDeliveryFee } from "../utils/calculateDeliveryFee";
 import { calculateDeliveryDistance } from "../utils/calculateDeliveryDistance";
 import {
@@ -13,7 +13,7 @@ import {
   OrderDetailsFormAction,
   OrderDetailsFormState,
 } from "./OrderDetails.types";
-import { DeliveryOrderPrice } from "../common/internal";
+import { DeliveryOrderPrice } from "../types/internal";
 
 const initialOrderDetailsFormState: OrderDetailsFormState = {
   venueSlug: "",
@@ -144,7 +144,7 @@ function OrderDetails({ setDeliveryOrderPrice }: OrderDetailsProps) {
       // To-do: Handle missing field and case where number inputs are 0
       if (!venueSlug || !cartValue || !userLatitude || !userLongitude) return;
 
-      const venueInfo = await getVenueInfo(venueSlug);
+      const venueInfo = await getVenueDeliveryOrderInfo(venueSlug);
 
       const deliveryDistance = calculateDeliveryDistance(
         {
@@ -196,12 +196,10 @@ function OrderDetails({ setDeliveryOrderPrice }: OrderDetailsProps) {
         </button>
         <button value="Calculate delivery fee">Calculate delivery fee</button>
       </form>
-
       <div>
         {shouldShowDeliveryDistanceAlert &&
           "Cannot calculate delivery fee. The location is outside of the delivery range."}
       </div>
-     
     </div>
   );
 }

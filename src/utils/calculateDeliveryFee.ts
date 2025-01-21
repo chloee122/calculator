@@ -1,4 +1,4 @@
-import { VenueDeliveryOrderInfo } from "../common/internal";
+import { VenueDeliveryOrderInfo } from "../types/internal";
 
 export const calculateDeliveryFee = (
     distanceRanges: VenueDeliveryOrderInfo["distanceRanges"],

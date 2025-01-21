@@ -1,4 +1,4 @@
-import { DeliveryOrderPrice } from "../common/internal";
+import type { DeliveryOrderPrice } from "../types/internal";
 import { convertCentToEuroString } from "../utils/convertEuroCurrencyUnit";
 
 interface PriceBreakdownProps {
@@ -38,7 +38,7 @@ function PriceBreakdown({ deliveryOrderPrice }: PriceBreakdownProps) {
       <h4>Price Breakdown</h4>
       {priceItems.map((item) => {
         return (
-          <div>
+          <div key={item.label}>
             {item.label}:{" "}
             {item.label === "Distance"
               ? item.value

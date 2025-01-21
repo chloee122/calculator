@@ -1,7 +1,7 @@
 import { useState } from "react";
-import OrderDetails from "./OrderDetails";
 import PriceBreakdown from "./PriceBreakdown";
-import { DeliveryOrderPrice } from "../common/internal";
+import type { DeliveryOrderPrice } from "../types/internal";
+import { OrderDetailsForm } from "./OrderDetailsForm/OrderDetailsForm";
 
 function PriceCalculator() {
   const [deliveryOrderPrice, setDeliveryOrderPrice] =
@@ -16,7 +16,7 @@ function PriceCalculator() {
   return (
     <div>
       <h1>Delivery Order Price Calculator</h1>
-      <OrderDetails setDeliveryOrderPrice={setDeliveryOrderPrice} />
+      <OrderDetailsForm setDeliveryOrderPrice={setDeliveryOrderPrice} />
       <PriceBreakdown deliveryOrderPrice={deliveryOrderPrice} />
     </div>
   );
