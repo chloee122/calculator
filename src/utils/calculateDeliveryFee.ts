@@ -8,7 +8,8 @@ export const calculateDeliveryFee = (
     let distanceOutOfDeliveryRange = true;
 
     for (let i = 0; i < distanceRanges.length; i++) {
-        if (deliveryDistance >= 0 && deliveryDistance < distanceRanges[i].max) {
+        // To-do: Double check deliveryDistance < 0?
+        if (deliveryDistance < distanceRanges[i].max) {
             const { a, b } = distanceRanges[i];
 
             distanceOutOfDeliveryRange = false;

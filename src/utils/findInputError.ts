@@ -2,7 +2,7 @@ import {
     FieldErrors,
     FieldValues,
 } from "react-hook-form";
-import { InputError } from "../components/OrderDetailsForm/Input";
+import { InputError } from "../components/OrderDetailsForm/Field";
 
 export const findInputError = (errors: FieldErrors<FieldValues>, id: string): InputError => {
     const filtered = Object.keys(errors)

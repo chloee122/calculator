@@ -1,5 +1,5 @@
 import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
-import { Input } from "./Input";
+import Field from "./Field";
 import { getUserCoordinates } from "../../utils/getUserCoordinates";
 import type { DeliveryOrderPrice } from "../../types/internal";
 import { calculateDeliveryDistance } from "../../utils/calculateDeliveryDistance";
@@ -164,15 +164,13 @@ export function OrderDetailsForm({
         <div>
           <h4>Order Details</h4>
           {formFields.map((field) => {
-            return <Input field={field} key={field.label} />;
+            return <Field field={field} key={field.label} />;
           })}
         </div>
-        <button onClick={handleClick} value="Get location">
+        <button disabled={isGettingCoordinates} onClick={handleClick}>
           {isGettingCoordinates ? "Loading" : "Get location"}
         </button>
-        <button value="Calculate delivery fee" disabled={isGettingCoordinates}>
-          Calculate delivery fee
-        </button>
+        <button disabled={isGettingCoordinates}>Calculate delivery fee</button>
       </form>
     </FormProvider>
   );

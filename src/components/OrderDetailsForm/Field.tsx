@@ -12,7 +12,7 @@ export interface InputError {
   error?: FieldError;
 }
 
-export function Input({ field }: InputProps) {
+function Field({ field }: InputProps) {
   const { label, inputType, id, attribute, defaultValue, placeHolder } = field;
   const {
     register,
@@ -39,6 +39,7 @@ export function Input({ field }: InputProps) {
         </AnimatePresence>
       </div>
       <input
+        data-test-id={id}
         defaultValue={defaultValue}
         id={id}
         type={inputType}
@@ -64,3 +65,5 @@ export function Input({ field }: InputProps) {
     </div>
   );
 }
+
+export default Field;
