@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
 import { Input } from "./Input";
 import { getUserCoordinates } from "../../utils/getUserCoordinates";
@@ -7,9 +6,13 @@ import { calculateDeliveryDistance } from "../../utils/calculateDeliveryDistance
 import { calculateDeliveryFee } from "../../utils/calculateDeliveryFee";
 import { getVenueDeliveryOrderInfo } from "../../api/venues";
 import { convertEuroToCent } from "../../utils/convertEuroCurrencyUnit";
+import { AxiosError } from "axios";
+import { toast } from "react-toastify";
+import { useState } from "react";
 
 interface FormProps {
   setDeliveryOrderPrice: (deliveryOrderPrice: DeliveryOrderPrice) => void;
+  setError: (error: string) => void;
 }
 
 export type FormField = {
@@ -28,12 +31,14 @@ interface FormValues {
   userLongitude: string | number;
 }
 
-export function OrderDetailsForm({ setDeliveryOrderPrice }: FormProps) {
-  const [shouldShowDeliveryDistanceAlert, setShouldShowDeliveryDistanceAlert] =
-    useState(false);
-
+export function OrderDetailsForm({
+  setDeliveryOrderPrice,
+  setError,
+}: FormProps) {
   const methods = useForm<FormValues>();
   const { setValue, handleSubmit } = methods;
+
+  const [isGettingCoordinates, setIsGettingCoordinates] = useState(false);
 
   const formFields: FormField[] = [
     {
@@ -55,12 +60,16 @@ export function OrderDetailsForm({ setDeliveryOrderPrice }: FormProps) {
       inputType: "number",
       id: "userLatitude",
       placeHolder: "Enter user latitude",
+      // To-do: remove
+      defaultValue: "60.161836",
     },
     {
       label: "User longitude",
       inputType: "number",
       id: "userLongitude",
       placeHolder: "Enter user longitude",
+      // To-do: remove
+      defaultValue: "24.9197347",
     },
   ];
 
@@ -69,6 +78,7 @@ export function OrderDetailsForm({ setDeliveryOrderPrice }: FormProps) {
   ) => {
     try {
       e.preventDefault();
+      setIsGettingCoordinates(true);
       const { latitude, longitude } = await getUserCoordinates();
 
       setValue("userLatitude", latitude, {
@@ -78,7 +88,9 @@ export function OrderDetailsForm({ setDeliveryOrderPrice }: FormProps) {
         shouldValidate: true,
       });
     } catch (error) {
-      console.error(error);
+      if (error instanceof Error) toast.error(error.message);
+    } finally {
+      setIsGettingCoordinates(false);
     }
   };
 
@@ -122,7 +134,8 @@ export function OrderDetailsForm({ setDeliveryOrderPrice }: FormProps) {
         basePrice
       );
 
-      setShouldShowDeliveryDistanceAlert(distanceOutOfDeliveryRange);
+      if (distanceOutOfDeliveryRange)
+        setError("The location is outside of the delivery range.");
 
       const smallOrderSurcharge = Math.max(
         orderMinimumNoSurcharge - cartValue,
@@ -138,8 +151,10 @@ export function OrderDetailsForm({ setDeliveryOrderPrice }: FormProps) {
         totalPrice,
       });
     } catch (error) {
-      console.error(error);
-      // To-do: Handle case where venue slug is not found
+      if (error instanceof AxiosError) {
+        setError(error.response?.data.message || "Something went wrong.");
+        console.error(error.message);
+      }
     }
   };
 
@@ -153,13 +168,11 @@ export function OrderDetailsForm({ setDeliveryOrderPrice }: FormProps) {
           })}
         </div>
         <button onClick={handleClick} value="Get location">
-          Get location
+          {isGettingCoordinates ? "Loading" : "Get location"}
         </button>
-        <button value="Calculate delivery fee">Calculate delivery fee</button>
-        <div style={{ color: "red" }}>
-          {shouldShowDeliveryDistanceAlert &&
-            "Cannot calculate delivery fee. The location is outside of the delivery range."}
-        </div>
+        <button value="Calculate delivery fee" disabled={isGettingCoordinates}>
+          Calculate delivery fee
+        </button>
       </form>
     </FormProvider>
   );

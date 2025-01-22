@@ -12,12 +12,22 @@ function PriceCalculator() {
       deliveryDistance: 0,
       totalPrice: 0,
     });
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <div>
       <h1>Delivery Order Price Calculator</h1>
-      <OrderDetailsForm setDeliveryOrderPrice={setDeliveryOrderPrice} />
-      <PriceBreakdown deliveryOrderPrice={deliveryOrderPrice} />
+      <OrderDetailsForm
+        setDeliveryOrderPrice={setDeliveryOrderPrice}
+        setError={setError}
+      />
+      {error ? (
+        <div style={{ color: "red" }}>
+          Cannot calculate the delivery fee. {error}
+        </div>
+      ) : (
+        <PriceBreakdown deliveryOrderPrice={deliveryOrderPrice} />
+      )}
     </div>
   );
 }

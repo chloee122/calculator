@@ -37,12 +37,13 @@ function PriceBreakdown({ deliveryOrderPrice }: PriceBreakdownProps) {
     <div>
       <h4>Price Breakdown</h4>
       {priceItems.map((item) => {
+        const value =
+          item.label === "Distance"
+            ? item.value
+            : convertCentToEuroString(item.value);
         return (
           <div key={item.label}>
-            {item.label}:{" "}
-            {item.label === "Distance"
-              ? item.value
-              : convertCentToEuroString(item.value)}{" "}
+            {item.label}: <span data-raw-value={item.value}>{value}</span>{" "}
             {item.unit}
           </div>
         );
