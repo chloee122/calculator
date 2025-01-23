@@ -1,14 +1,14 @@
-import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
-import Field from "./Field";
-import { getUserCoordinates } from "../../utils/getUserCoordinates";
+import { AxiosError } from "axios";
+import { useState } from "react";
+import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import { getVenueDeliveryOrderInfo } from "../../api/venues";
 import type { DeliveryOrderPrice } from "../../types/internal";
 import { calculateDeliveryDistance } from "../../utils/calculateDeliveryDistance";
 import { calculateDeliveryFee } from "../../utils/calculateDeliveryFee";
-import { getVenueDeliveryOrderInfo } from "../../api/venues";
 import { convertEuroToCent } from "../../utils/convertEuroCurrencyUnit";
-import { AxiosError } from "axios";
-import { toast } from "react-toastify";
-import { useState } from "react";
+import { getUserCoordinates } from "../../utils/getUserCoordinates";
+import Field from "./Field";
 
 interface FormProps {
   setDeliveryOrderPrice: (deliveryOrderPrice: DeliveryOrderPrice) => void;
@@ -96,6 +96,7 @@ export function OrderDetailsForm({
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     // To-do: Double check
+    // Keep this?
     // if (!venueSlug || !cartValue || !userLatitude || !userLongitude) return;
 
     try {
@@ -136,6 +137,7 @@ export function OrderDetailsForm({
 
       if (distanceOutOfDeliveryRange)
         setError("The location is outside of the delivery range.");
+        // return here?
 
       const smallOrderSurcharge = Math.max(
         orderMinimumNoSurcharge - cartValue,
@@ -167,9 +169,11 @@ export function OrderDetailsForm({
             return <Field field={field} key={field.label} />;
           })}
         </div>
+        {/* missing data-test-id for button */}
         <button disabled={isGettingCoordinates} onClick={handleClick}>
           {isGettingCoordinates ? "Loading" : "Get location"}
         </button>
+        {/* missing data-test-id for button */}
         <button disabled={isGettingCoordinates}>Calculate delivery fee</button>
       </form>
     </FormProvider>

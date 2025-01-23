@@ -7,6 +7,7 @@ interface PriceBreakdownProps {
 
 function PriceBreakdown({ deliveryOrderPrice }: PriceBreakdownProps) {
   const priceItems = [
+    // convert eur to cent from here, not in the map function?
     {
       label: "Cart Value",
       value: deliveryOrderPrice.cartValue,

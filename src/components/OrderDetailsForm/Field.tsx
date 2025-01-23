@@ -1,8 +1,8 @@
-import { FieldError, useFormContext } from "react-hook-form";
 import { AnimatePresence } from "motion/react";
-import type { FormField } from "./OrderDetailsForm";
-import InputError from "./InputError";
+import { FieldError, useFormContext } from "react-hook-form";
 import { findInputError } from "../../utils/findInputError";
+import InputError from "./InputError";
+import type { FormField } from "./OrderDetailsForm";
 
 interface InputProps {
   field: FormField;
@@ -25,6 +25,7 @@ function Field({ field }: InputProps) {
   const preventSpecialCharactersNumberInput = (
     e: React.KeyboardEvent<HTMLInputElement>
   ) => {
+    // what's this? look hacky
     if (id !== "venueSlug" && ["e", "E", "+", "-"].includes(e.key)) {
       e.preventDefault();
     }
