@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import PriceCalculator from "./PriceCalculator";
 
@@ -33,6 +33,7 @@ describe("PriceCalculator", () => {
     expect(toastMessage).toBeInTheDocument();
   });
 
+  // why commented?
   // test.only("should display error message when endpoint returns other error", async () => {
   //   vi.mock("../api/venues", () => ({
   //     getVenueDeliveryOrderInfo: vi.fn(() =>

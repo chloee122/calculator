@@ -13,6 +13,9 @@ const validCases = [
   ["returns a delivery fee for distance in the second range", 500, 190, 290],
   ["returns a delivery fee for distance in the third range", 1229, 190, 390],
   ["returns a delivery fee for distance in the fourth range", 1565, 190, 547],
+  // add some test case that at the max value of the range
+  // ["returns a delivery fee for distance for delivery distance of 1000", 1000, 190, 390],
+  // ["returns a delivery fee for distance for delivery distance of 1999", 1999, 190, 590],
 ];
 
 describe("calculateDeliveryFee", () => {

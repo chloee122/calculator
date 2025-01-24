@@ -1,14 +1,14 @@
-import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
-import Field from "./Field";
-import { getUserCoordinates } from "../../utils/getUserCoordinates";
+import { AxiosError } from "axios";
+import { useState } from "react";
+import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import { getVenueDeliveryOrderInfo } from "../../api/venues";
 import type { DeliveryOrderPrice } from "../../types/internal";
 import { calculateDeliveryDistance } from "../../utils/calculateDeliveryDistance";
 import { calculateDeliveryFee } from "../../utils/calculateDeliveryFee";
-import { getVenueDeliveryOrderInfo } from "../../api/venues";
 import { convertEuroToCent } from "../../utils/convertEuroCurrencyUnit";
-import { AxiosError } from "axios";
-import { toast } from "react-toastify";
-import { useState } from "react";
+import { getUserCoordinates } from "../../utils/getUserCoordinates";
+import Field from "./Field";
 
 interface FormProps {
   setDeliveryOrderPrice: (deliveryOrderPrice: DeliveryOrderPrice) => void;
@@ -96,6 +96,7 @@ function OrderDetailsForm({ setDeliveryOrderPrice, setError }: FormProps) {
       // To-do: Check if cartValue = 0?
       // To-do: return or throw error if any of the fields are empty
       setError(null);
+      // can be simpler: Object.values(data).some((value) => !value)
       if (!Object.values(data).every((value) => value !== "")) return;
       const venueSlug = data.venueSlug;
       const cartValue = convertEuroToCent(Number(data.cartValue));
