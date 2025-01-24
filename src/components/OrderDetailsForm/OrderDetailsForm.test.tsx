@@ -48,10 +48,18 @@ describe("OrderDetailsForm", () => {
     const button = screen.getByText("Calculate delivery fee");
     await user.click(button);
 
-    expect(screen.getByText("Venue slug is required")).toBeInTheDocument();
-    expect(screen.getByText("Cart value is required")).toBeInTheDocument();
-    expect(screen.getByText("User latitude is required")).toBeInTheDocument();
-    expect(screen.getByText("User longitude is required")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Venue slug is required")
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText("Cart value is required")
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText("User latitude is required")
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText("User longitude is required")
+    ).toBeInTheDocument();
   });
 
   test("should show a specific validation feedback when cart value input is 0", async () => {

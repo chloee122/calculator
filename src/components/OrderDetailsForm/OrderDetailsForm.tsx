@@ -12,7 +12,7 @@ import { useState } from "react";
 
 interface FormProps {
   setDeliveryOrderPrice: (deliveryOrderPrice: DeliveryOrderPrice) => void;
-  setError: (error: string) => void;
+  setError: (error: string | null) => void;
 }
 
 export type FormField = {
@@ -92,10 +92,11 @@ function OrderDetailsForm({ setDeliveryOrderPrice, setError }: FormProps) {
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    // To-do: Check if cartValue = 0?
-    if (!Object.values(data).every((value) => value !== "")) return;
-
     try {
+      // To-do: Check if cartValue = 0?
+      // To-do: return or throw error if any of the fields are empty
+      setError(null);
+      if (!Object.values(data).every((value) => value !== "")) return;
       const venueSlug = data.venueSlug;
       const cartValue = convertEuroToCent(Number(data.cartValue));
       const userLatitude = Number(data.userLatitude);
