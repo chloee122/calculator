@@ -16,10 +16,10 @@ function InputError({ message }: InputErrorProps) {
   if (!message) return null;
 
   return (
-    <motion.p {...framer_error} style={{ color: "red" }}>
+    <motion.span {...framer_error} style={{ color: "red" }} role="alert">
       <MdError />
       {message}
-    </motion.p>
+    </motion.span>
   );
 }
 

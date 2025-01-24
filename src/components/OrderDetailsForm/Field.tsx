@@ -22,9 +22,10 @@ function Field({ field }: InputProps) {
   const inputError = findInputError(errors, id);
   const isInvalid = Object.keys(inputError).length > 0;
 
-  const preventSpecialCharactersNumberInput = (
+  const preventSpecialCharactersInNumberInput = (
     e: React.KeyboardEvent<HTMLInputElement>
   ) => {
+    // Prevent "e", "E", "+", "-" from being allowed in HTML number input
     if (id !== "venueSlug" && ["e", "E", "+", "-"].includes(e.key)) {
       e.preventDefault();
     }
@@ -48,7 +49,7 @@ function Field({ field }: InputProps) {
         {...register(id, {
           required: {
             value: true,
-            message: "required",
+            message: `${label} is required`,
           },
           validate: {
             checkCartValue: (fieldValue) => {
@@ -59,7 +60,7 @@ function Field({ field }: InputProps) {
             },
           },
         })}
-        onKeyDown={preventSpecialCharactersNumberInput}
+        onKeyDown={preventSpecialCharactersInNumberInput}
         aria-invalid={errors[id] ? "true" : "false"}
       />
     </div>

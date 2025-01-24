@@ -31,10 +31,7 @@ interface FormValues {
   userLongitude: string | number;
 }
 
-export function OrderDetailsForm({
-  setDeliveryOrderPrice,
-  setError,
-}: FormProps) {
+function OrderDetailsForm({ setDeliveryOrderPrice, setError }: FormProps) {
   const methods = useForm<FormValues>();
   const { setValue, handleSubmit } = methods;
 
@@ -61,7 +58,7 @@ export function OrderDetailsForm({
       id: "userLatitude",
       placeHolder: "Enter user latitude",
       // To-do: remove
-      defaultValue: "60.161836",
+      // defaultValue: "60.161836",
     },
     {
       label: "User longitude",
@@ -69,7 +66,7 @@ export function OrderDetailsForm({
       id: "userLongitude",
       placeHolder: "Enter user longitude",
       // To-do: remove
-      defaultValue: "24.9197347",
+      // defaultValue: "24.9197347",
     },
   ];
 
@@ -95,19 +92,14 @@ export function OrderDetailsForm({
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    // To-do: Double check
-    // if (!venueSlug || !cartValue || !userLatitude || !userLongitude) return;
+    // To-do: Check if cartValue = 0?
+    if (!Object.values(data).every((value) => value !== "")) return;
 
     try {
-      const orderDetails = {
-        venueSlug: data.venueSlug,
-        cartValue: convertEuroToCent(Number(data.cartValue)),
-        userLatitude: Number(data.userLatitude),
-        userLongitude: Number(data.userLongitude),
-      };
-
-      const { venueSlug, cartValue, userLatitude, userLongitude } =
-        orderDetails;
+      const venueSlug = data.venueSlug;
+      const cartValue = convertEuroToCent(Number(data.cartValue));
+      const userLatitude = Number(data.userLatitude);
+      const userLongitude = Number(data.userLongitude);
 
       const {
         venueLatitude,
@@ -128,14 +120,11 @@ export function OrderDetailsForm({
         }
       );
 
-      const { distanceOutOfDeliveryRange, deliveryFee } = calculateDeliveryFee(
+      const deliveryFee = calculateDeliveryFee(
         distanceRanges,
         deliveryDistance,
         basePrice
       );
-
-      if (distanceOutOfDeliveryRange)
-        setError("The location is outside of the delivery range.");
 
       const smallOrderSurcharge = Math.max(
         orderMinimumNoSurcharge - cartValue,
@@ -154,6 +143,8 @@ export function OrderDetailsForm({
       if (error instanceof AxiosError) {
         setError(error.response?.data.message || "Something went wrong.");
         console.error(error.message);
+      } else if (error instanceof Error) {
+        setError(error.message || "Something went wrong");
       }
     }
   };
@@ -167,11 +158,22 @@ export function OrderDetailsForm({
             return <Field field={field} key={field.label} />;
           })}
         </div>
-        <button disabled={isGettingCoordinates} onClick={handleClick}>
+        <button
+          data-test-id="getLocation"
+          disabled={isGettingCoordinates}
+          onClick={handleClick}
+        >
           {isGettingCoordinates ? "Loading" : "Get location"}
         </button>
-        <button disabled={isGettingCoordinates}>Calculate delivery fee</button>
+        <button
+          data-test-id="calculateDeliveryPrice"
+          disabled={isGettingCoordinates}
+        >
+          Calculate delivery fee
+        </button>
       </form>
     </FormProvider>
   );
 }
+
+export default OrderDetailsForm;
