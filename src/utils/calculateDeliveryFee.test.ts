@@ -8,56 +8,27 @@ const distanceRanges = [
   { min: 2000, max: 0, a: 0, b: 0, flag: null },
 ];
 
-const testCases = [
-  [
-    "returns a delivery fee for distance within the first range",
-    499,
-    190,
-    { distanceOutOfDeliveryRange: false, deliveryFee: 190 },
-  ],
-  [
-    "returns a delivery fee for distance in the second range",
-    500,
-    190,
-    { distanceOutOfDeliveryRange: false, deliveryFee: 290 },
-  ],
-  [
-    "returns a delivery fee for distance in the third range",
-    1229,
-    190,
-    { distanceOutOfDeliveryRange: false, deliveryFee: 390 },
-  ],
-  [
-    "returns a delivery fee for distance in the fourth range",
-    1565,
-    190,
-    { distanceOutOfDeliveryRange: false, deliveryFee: 547 },
-  ],
-  [
-    "returns a delivery fee as 0 for distance out of range",
-    2000,
-    190,
-    { distanceOutOfDeliveryRange: true, deliveryFee: 0 },
-  ],
-  [
-    "returns valid delivery fee for any delivery distance within the ranges",
-    100,
-    0,
-    { distanceOutOfDeliveryRange: false, deliveryFee: 0 },
-  ],
+const validCases = [
+  ["returns a delivery fee for distance within the first range", 499, 190, 190],
+  ["returns a delivery fee for distance in the second range", 500, 190, 290],
+  ["returns a delivery fee for distance in the third range", 1229, 190, 390],
+  ["returns a delivery fee for distance in the fourth range", 1565, 190, 547],
 ];
 
 describe("calculateDeliveryFee", () => {
-  test.only.each(testCases)(
-    "%s",
-    (_, deliveryDistance, basePrice, expected) => {
-      expect(
-        calculateDeliveryFee(
-          distanceRanges,
-          deliveryDistance as number,
-          basePrice as number
-        )
-      ).toStrictEqual(expected);
-    }
-  );
+  test.each(validCases)("%s", (_, deliveryDistance, basePrice, expected) => {
+    expect(
+      calculateDeliveryFee(
+        distanceRanges,
+        deliveryDistance as number,
+        basePrice as number
+      )
+    ).toEqual(expected);
+  });
+
+  test("throws an error when delivery distance is out of range", () => {
+    expect(() => calculateDeliveryFee(distanceRanges, 2001, 190)).toThrowError(
+      "The location is outside of the delivery range."
+    );
+  });
 });

@@ -28,6 +28,12 @@ describe("convertEuroToCent", () => {
       expect(convertEuroToCent(euro)).toBe(expected);
     }
   );
+
+  test("should throw an error when euro is negative", () => {
+    expect(() => convertEuroToCent(-1)).toThrowError(
+      "Euro value cannot be negative"
+    );
+  });
 });
 
 describe("convertCentToEuroString", () => {
@@ -37,4 +43,10 @@ describe("convertCentToEuroString", () => {
       expect(convertCentToEuroString(cent)).toBe(expected);
     }
   );
+
+  test("should throw an error when cent is negative", () => {
+    expect(() => convertCentToEuroString(-1000)).toThrowError(
+      "Cent value cannot be negative"
+    );
+  });
 });
