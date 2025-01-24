@@ -1,12 +1,13 @@
+import "@testing-library/jest-dom/vitest";
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { FormProvider, useForm } from "react-hook-form";
 import OrderDetailsForm from "./OrderDetailsForm";
-import "@testing-library/jest-dom/vitest";
-import userEvent from "@testing-library/user-event";
 
 const mockSetDeliveryOrderPrice = vi.fn();
 const mockSetError = vi.fn();
 
+// Name it TestForm or something similar
 const TestComponent = () => {
   const methods = useForm();
   return (
@@ -42,6 +43,7 @@ describe("OrderDetailsForm", () => {
 
     const user = userEvent.setup();
 
+    // nit: in general avoid getByPlaceholderText/getByText, usually it's better to use getByLabelText, getByTestId or getByRole
     const venueSlugField = screen.getByPlaceholderText("Enter venue slug");
     await user.clear(venueSlugField);
 
