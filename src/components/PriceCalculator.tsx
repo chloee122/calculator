@@ -3,6 +3,13 @@ import { ToastContainer, Slide } from "react-toastify";
 import PriceBreakdown from "./PriceBreakdown";
 import type { DeliveryOrderPrice } from "../types/internal";
 import OrderDetailsForm from "./OrderDetailsForm/OrderDetailsForm";
+import {
+  ErrorContainer,
+  ErrorIcon,
+  PriceCalculatorContainer,
+  Title,
+  TitleContainer,
+} from "./styles/PriceCalculator.styled";
 
 function PriceCalculator() {
   const [deliveryOrderPrice, setDeliveryOrderPrice] =
@@ -14,9 +21,10 @@ function PriceCalculator() {
       totalPrice: 0,
     });
   const [error, setError] = useState<string | null>(null);
+  const [isCalculating, setIsCalculating] = useState(false);
 
   return (
-    <div>
+    <PriceCalculatorContainer>
       <ToastContainer
         position="bottom-right"
         hideProgressBar
@@ -26,19 +34,27 @@ function PriceCalculator() {
         theme="light"
         transition={Slide}
       />
-      <h1>Delivery Order Price Calculator</h1>
+      <TitleContainer>
+        <Title>Delivery Order Price Calculator</Title>
+      </TitleContainer>
       <OrderDetailsForm
         setDeliveryOrderPrice={setDeliveryOrderPrice}
         setError={setError}
+        setIsCalculating={setIsCalculating}
       />
       {error ? (
-        <div style={{ color: "red" }}>
-          Cannot calculate the delivery fee. {error}
-        </div>
+        <ErrorContainer>
+          <ErrorIcon />
+          Cannot calculate the delivery fee.
+          <br /> {error}
+        </ErrorContainer>
       ) : (
-        <PriceBreakdown deliveryOrderPrice={deliveryOrderPrice} />
+        <PriceBreakdown
+          deliveryOrderPrice={deliveryOrderPrice}
+          isCalculating={isCalculating}
+        />
       )}
-    </div>
+    </PriceCalculatorContainer>
   );
 }
 

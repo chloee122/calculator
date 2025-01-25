@@ -1,5 +1,4 @@
-import { motion } from "motion/react";
-import { MdError } from "react-icons/md";
+import { ErrorIcon, ErrorMessage } from "../styles/InputError.styled";
 
 interface InputErrorProps {
   message?: string;
@@ -16,10 +15,10 @@ function InputError({ message }: InputErrorProps) {
   if (!message) return null;
 
   return (
-    <motion.span {...framer_error} style={{ color: "red" }} role="alert">
-      <MdError />
+    <ErrorMessage {...framer_error} role="alert">
+      <ErrorIcon />
       {message}
-    </motion.span>
+    </ErrorMessage>
   );
 }
 

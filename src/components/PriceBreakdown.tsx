@@ -1,21 +1,32 @@
 import type { DeliveryOrderPrice } from "../types/internal";
 import { convertCentToEuroString } from "../utils/convertEuroCurrencyUnit";
+import {
+  CourierIcon,
+  Heading,
+  PriceBreakdownContainer,
+  PriceItem,
+  SkeletonItem,
+} from "./styles/PriceBreakdown.styled";
 
 interface PriceBreakdownProps {
   deliveryOrderPrice: DeliveryOrderPrice;
+  isCalculating: boolean;
 }
 
-function PriceBreakdown({ deliveryOrderPrice }: PriceBreakdownProps) {
+function PriceBreakdown({
+  deliveryOrderPrice,
+  isCalculating,
+}: PriceBreakdownProps) {
   const priceItems = [
     {
       label: "Cart Value",
       value: deliveryOrderPrice.cartValue,
-      unit: "EUR",
+      unit: "€",
     },
     {
       label: "Delivery Fee",
       value: deliveryOrderPrice.deliveryFee,
-      unit: "EUR",
+      unit: "€",
     },
     {
       label: "Distance",
@@ -25,30 +36,44 @@ function PriceBreakdown({ deliveryOrderPrice }: PriceBreakdownProps) {
     {
       label: "Small Order Surcharge",
       value: deliveryOrderPrice.smallOrderSurcharge,
-      unit: "EUR",
+      unit: "€",
     },
     {
       label: "Total",
       value: deliveryOrderPrice.totalPrice,
-      unit: "EUR",
+      unit: "€",
     },
   ];
-  return (
+
+  const skeletonLoadingItems = (
     <div>
-      <h4>Price Breakdown</h4>
-      {priceItems.map((item) => {
-        const value =
-          item.label === "Distance"
-            ? item.value
-            : convertCentToEuroString(item.value);
-        return (
-          <div key={item.label}>
-            {item.label}: <span data-raw-value={item.value}>{value}</span>{" "}
-            {item.unit}
-          </div>
-        );
-      })}
+      {Array.from({ length: priceItems.length }).map((_, index) => (
+        <SkeletonItem key={index} />
+      ))}
     </div>
+  );
+
+  const priceBreakdownItems = priceItems.map((item) => {
+    const value =
+      item.label === "Distance"
+        ? item.value
+        : convertCentToEuroString(item.value);
+    return (
+      <PriceItem key={item.label}>
+        {item.label}: <span data-raw-value={item.value}>{value}</span>{" "}
+        {item.unit}
+      </PriceItem>
+    );
+  });
+
+  return (
+    <PriceBreakdownContainer>
+      <Heading>
+        <CourierIcon />
+        Price Breakdown
+      </Heading>
+      {isCalculating ? skeletonLoadingItems : priceBreakdownItems}
+    </PriceBreakdownContainer>
   );
 }
 

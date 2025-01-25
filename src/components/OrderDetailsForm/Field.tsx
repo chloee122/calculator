@@ -3,6 +3,12 @@ import { AnimatePresence } from "motion/react";
 import type { FormField } from "./OrderDetailsForm";
 import InputError from "./InputError";
 import { findInputError } from "../../utils/findInputError";
+import {
+  FieldContainer,
+  Input,
+  Label,
+  LabelContainer,
+} from "../styles/Field.styled";
 
 interface InputProps {
   field: FormField;
@@ -32,14 +38,14 @@ function Field({ field }: InputProps) {
   };
 
   return (
-    <div>
-      <div>
-        <label htmlFor={id}>{label}</label>
+    <FieldContainer>
+      <LabelContainer>
+        <Label htmlFor={id}>{label}</Label>
         <AnimatePresence mode="wait" initial={false}>
           {isInvalid && <InputError message={inputError.error?.message} />}
         </AnimatePresence>
-      </div>
-      <input
+      </LabelContainer>
+      <Input
         data-test-id={id}
         defaultValue={defaultValue}
         id={id}
@@ -61,9 +67,10 @@ function Field({ field }: InputProps) {
           },
         })}
         onKeyDown={preventSpecialCharactersInNumberInput}
+        $isInvalid={isInvalid}
         aria-invalid={errors[id] ? "true" : "false"}
       />
-    </div>
+    </FieldContainer>
   );
 }
 

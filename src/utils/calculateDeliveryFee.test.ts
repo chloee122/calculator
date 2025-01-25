@@ -28,7 +28,7 @@ describe("calculateDeliveryFee", () => {
 
   test("throws an error when delivery distance is out of range", () => {
     expect(() => calculateDeliveryFee(distanceRanges, 2001, 190)).toThrowError(
-      "The location is outside of the delivery range."
+      "This location is outside of the delivery range (2001 m)."
     );
   });
 });

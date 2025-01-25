@@ -6,6 +6,7 @@ import userEvent from "@testing-library/user-event";
 
 const mockSetDeliveryOrderPrice = vi.fn();
 const mockSetError = vi.fn();
+const mockSetIsCalculating = vi.fn();
 
 const TestComponent = () => {
   const methods = useForm();
@@ -14,6 +15,7 @@ const TestComponent = () => {
       <OrderDetailsForm
         setDeliveryOrderPrice={mockSetDeliveryOrderPrice}
         setError={mockSetError}
+        setIsCalculating={mockSetIsCalculating}
       />
     </FormProvider>
   );

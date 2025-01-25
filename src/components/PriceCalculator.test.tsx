@@ -155,7 +155,7 @@ describe("PriceCalculator", () => {
     await user.click(calculateButton);
 
     const errorMessage = await screen.findByText(
-      "Cannot calculate the delivery fee. The location is outside of the delivery range."
+      "Cannot calculate the delivery fee. This location is outside of the delivery range (4846 m)."
     );
     expect(errorMessage).toBeInTheDocument();
   });

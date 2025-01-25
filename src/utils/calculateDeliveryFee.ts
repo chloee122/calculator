@@ -11,5 +11,7 @@ export const calculateDeliveryFee = (
       return Math.ceil(basePrice + a + (b * deliveryDistance) / 10);
     }
   }
-  throw new Error("The location is outside of the delivery range.");
+  throw new Error(
+    `This location is outside of the delivery range (${deliveryDistance} m).`
+  );
 };

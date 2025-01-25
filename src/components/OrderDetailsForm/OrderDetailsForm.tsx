@@ -9,10 +9,16 @@ import { convertEuroToCent } from "../../utils/convertEuroCurrencyUnit";
 import { AxiosError } from "axios";
 import { toast } from "react-toastify";
 import { useState } from "react";
+import {
+  Button,
+  FormContainer,
+  Heading,
+} from "../styles/OrderDetailsForm.styled";
 
 interface FormProps {
   setDeliveryOrderPrice: (deliveryOrderPrice: DeliveryOrderPrice) => void;
   setError: (error: string | null) => void;
+  setIsCalculating: (isCalculating: boolean) => void;
 }
 
 export type FormField = {
@@ -31,7 +37,11 @@ interface FormValues {
   userLongitude: string | number;
 }
 
-function OrderDetailsForm({ setDeliveryOrderPrice, setError }: FormProps) {
+function OrderDetailsForm({
+  setDeliveryOrderPrice,
+  setError,
+  setIsCalculating,
+}: FormProps) {
   const methods = useForm<FormValues>();
   const { setValue, handleSubmit } = methods;
 
@@ -39,34 +49,30 @@ function OrderDetailsForm({ setDeliveryOrderPrice, setError }: FormProps) {
 
   const formFields: FormField[] = [
     {
+      id: "venueSlug",
       label: "Venue slug",
       inputType: "text",
-      id: "venueSlug",
       placeHolder: "Enter venue slug",
       defaultValue: "home-assignment-venue-helsinki",
     },
     {
+      id: "cartValue",
       label: "Cart value",
       inputType: "number",
-      id: "cartValue",
       placeHolder: "Enter cart value",
       attribute: { min: 1 },
     },
     {
+      id: "userLatitude",
       label: "User latitude",
       inputType: "number",
-      id: "userLatitude",
       placeHolder: "Enter user latitude",
-      // To-do: remove
-      // defaultValue: "60.161836",
     },
     {
+      id: "userLongitude",
       label: "User longitude",
       inputType: "number",
-      id: "userLongitude",
       placeHolder: "Enter user longitude",
-      // To-do: remove
-      // defaultValue: "24.9197347",
     },
   ];
 
@@ -95,6 +101,7 @@ function OrderDetailsForm({ setDeliveryOrderPrice, setError }: FormProps) {
     try {
       // To-do: Check if cartValue = 0?
       // To-do: return or throw error if any of the fields are empty
+      setIsCalculating(true);
       setError(null);
       if (!Object.values(data).every((value) => value !== "")) return;
       const venueSlug = data.venueSlug;
@@ -143,36 +150,41 @@ function OrderDetailsForm({ setDeliveryOrderPrice, setError }: FormProps) {
     } catch (error) {
       if (error instanceof AxiosError) {
         setError(error.response?.data.message || "Something went wrong.");
-        console.error(error.message);
       } else if (error instanceof Error) {
         setError(error.message || "Something went wrong");
       }
+    } finally {
+      setIsCalculating(false);
     }
   };
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} noValidate>
-        <div>
-          <h4>Order Details</h4>
-          {formFields.map((field) => {
-            return <Field field={field} key={field.label} />;
-          })}
-        </div>
-        <button
-          data-test-id="getLocation"
-          disabled={isGettingCoordinates}
-          onClick={handleClick}
-        >
-          {isGettingCoordinates ? "Loading" : "Get location"}
-        </button>
-        <button
-          data-test-id="calculateDeliveryPrice"
-          disabled={isGettingCoordinates}
-        >
-          Calculate delivery fee
-        </button>
-      </form>
+      <FormContainer>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          <div>
+            <Heading>Order Details</Heading>
+            {formFields.map((field) => {
+              return <Field key={field.label} field={field} />;
+            })}
+          </div>
+          <Button
+            data-test-id="getLocation"
+            id="getLocation"
+            disabled={isGettingCoordinates}
+            onClick={handleClick}
+          >
+            {isGettingCoordinates ? "Loading" : "Get location"}
+          </Button>
+          <Button
+            data-test-id="calculateDeliveryPrice"
+            id="calculateDeliveryPrice"
+            disabled={isGettingCoordinates}
+          >
+            Calculate delivery fee
+          </Button>
+        </form>
+      </FormContainer>
     </FormProvider>
   );
 }
