@@ -46,7 +46,7 @@ function PriceBreakdown({
   ];
 
   const skeletonLoadingItems = (
-    <div>
+    <div aria-label="Loading price breakdown">
       {Array.from({ length: priceItems.length }).map((_, index) => (
         <SkeletonItem key={index} />
       ))}
@@ -67,9 +67,9 @@ function PriceBreakdown({
   });
 
   return (
-    <PriceBreakdownContainer>
+    <PriceBreakdownContainer aria-live="polite" aria-atomic="true">
       <Heading>
-        <CourierIcon />
+        <CourierIcon aria-hidden="true" />
         Price Breakdown
       </Heading>
       {isCalculating ? skeletonLoadingItems : priceBreakdownItems}

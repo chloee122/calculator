@@ -16,7 +16,7 @@ function InputError({ message }: InputErrorProps) {
 
   return (
     <ErrorMessage {...framer_error} role="alert">
-      <ErrorIcon />
+      <ErrorIcon aria-hidden="true" />
       {message}
     </ErrorMessage>
   );

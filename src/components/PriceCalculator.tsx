@@ -43,8 +43,8 @@ function PriceCalculator() {
         setIsCalculating={setIsCalculating}
       />
       {error ? (
-        <ErrorContainer>
-          <ErrorIcon />
+        <ErrorContainer role="alert">
+          <ErrorIcon aria-hidden="true" />
           Cannot calculate the delivery fee.
           <br /> {error}
         </ErrorContainer>
