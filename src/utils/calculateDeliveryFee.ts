@@ -8,10 +8,8 @@ export const calculateDeliveryFee = (
   for (let i = 0; i < distanceRanges.length; i++) {
     if (deliveryDistance >= 0 && deliveryDistance < distanceRanges[i].max) {
       const { a, b } = distanceRanges[i];
-      return Math.ceil(basePrice + a + (b * deliveryDistance) / 10);
+      return basePrice + a + Math.round((b * deliveryDistance) / 10);
     }
   }
-  throw new Error(
-    `This location is outside of the delivery range (${deliveryDistance} m).`
-  );
+  throw new Error(`The delivery distance is too long (${deliveryDistance} m).`);
 };

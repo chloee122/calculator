@@ -3,12 +3,14 @@ import { FormProvider, useForm } from "react-hook-form";
 import OrderDetailsForm from "./OrderDetailsForm";
 import "@testing-library/jest-dom/vitest";
 import userEvent from "@testing-library/user-event";
+import * as userCoordinateMethods from "../../utils/getUserCoordinates";
 
 const mockSetDeliveryOrderPrice = vi.fn();
 const mockSetError = vi.fn();
 const mockSetIsCalculating = vi.fn();
+const testCoords = { latitude: 60.192059, longitude: 24.945831 };
 
-const TestComponent = () => {
+const TestForm = () => {
   const methods = useForm();
   return (
     <FormProvider {...methods}>
@@ -21,31 +23,15 @@ const TestComponent = () => {
   );
 };
 
-const mockGeolocation = {
-  getCurrentPosition: vi.fn((successCallback) => {
-    setTimeout(() => {
-      successCallback({
-        coords: {
-          latitude: 60.192059,
-          longitude: 24.945831,
-        },
-      });
-    }, 500);
-  }),
-};
-
-Object.defineProperty(navigator, "geolocation", {
-  value: mockGeolocation,
-});
-
 describe("OrderDetailsForm", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   test("should show validation feedbacks when all fields are missing", async () => {
-    render(<TestComponent />);
+    render(<TestForm />);
 
     const user = userEvent.setup();
-
-    const venueSlugField = screen.getByPlaceholderText("Enter venue slug");
-    await user.clear(venueSlugField);
 
     const button = screen.getByText("Calculate delivery fee");
     await user.click(button);
@@ -65,7 +51,7 @@ describe("OrderDetailsForm", () => {
   });
 
   test("should show a specific validation feedback when cart value input is 0", async () => {
-    render(<TestComponent />);
+    render(<TestForm />);
 
     const user = userEvent.setup();
 
@@ -80,14 +66,23 @@ describe("OrderDetailsForm", () => {
   });
 
   test("should fill user latitude and longitude fields when clicking on 'Get location' button", async () => {
-    render(<TestComponent />);
+    vi.spyOn(
+      userCoordinateMethods,
+      "getUserCoordinates"
+    ).mockImplementationOnce(() => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(testCoords);
+        }, 500);
+      });
+    });
+
+    render(<TestForm />);
 
     const user = userEvent.setup();
 
     const getLocationButton = screen.getByText("Get location");
     await user.click(getLocationButton);
-
-    expect(mockGeolocation.getCurrentPosition).toHaveBeenCalled();
 
     await waitFor(() => {
       const latitudeField = screen.getByPlaceholderText("Enter user latitude");
@@ -101,7 +96,18 @@ describe("OrderDetailsForm", () => {
   });
 
   test("should disable 'Get location' and 'Calculate delivery' buttons while fetching the location", async () => {
-    render(<TestComponent />);
+    vi.spyOn(
+      userCoordinateMethods,
+      "getUserCoordinates"
+    ).mockImplementationOnce(() => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(testCoords);
+        }, 500);
+      });
+    });
+
+    render(<TestForm />);
 
     const user = userEvent.setup();
 
@@ -113,8 +119,10 @@ describe("OrderDetailsForm", () => {
 
     await user.click(getLocationButton);
 
-    expect(getLocationButton).toBeDisabled();
-    expect(calculateDeliveryButton).toBeDisabled();
+    await waitFor(() => {
+      expect(getLocationButton).toBeDisabled();
+      expect(calculateDeliveryButton).toBeDisabled();
+    });
 
     await waitFor(() => {
       expect(getLocationButton).toBeEnabled();

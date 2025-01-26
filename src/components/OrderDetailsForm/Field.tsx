@@ -19,7 +19,7 @@ export interface InputError {
 }
 
 function Field({ field }: InputProps) {
-  const { label, inputType, id, attribute, defaultValue, placeHolder } = field;
+  const { label, inputType, id, attribute, placeHolder } = field;
   const {
     register,
     formState: { errors },
@@ -47,7 +47,6 @@ function Field({ field }: InputProps) {
       </LabelContainer>
       <Input
         data-test-id={id}
-        defaultValue={defaultValue}
         id={id}
         type={inputType}
         min={attribute?.min}

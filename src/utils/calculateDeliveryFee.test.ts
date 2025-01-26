@@ -9,10 +9,44 @@ const distanceRanges = [
 ];
 
 const validCases = [
-  ["returns a delivery fee for distance within the first range", 499, 190, 190],
-  ["returns a delivery fee for distance in the second range", 500, 190, 290],
-  ["returns a delivery fee for distance in the third range", 1229, 190, 390],
-  ["returns a delivery fee for distance in the fourth range", 1565, 190, 547],
+  ["should return a delivery fee for distance in the 1st range", 470, 190, 190],
+  ["should return a delivery fee for distance in the 2nd range", 500, 190, 290],
+  [
+    "should return a delivery fee for distance in the 3rd range",
+    1229,
+    190,
+    390,
+  ],
+  [
+    "should return a delivery fee for distance in the 5th range",
+    1565,
+    190,
+    547,
+  ],
+  [
+    "should return a delivery fee for the 1st range's max distance ",
+    499,
+    190,
+    190,
+  ],
+  [
+    "should return a delivery fee for the 2nd range's max distance",
+    999,
+    190,
+    290,
+  ],
+  [
+    "should return a delivery fee for the 3rd range's max distance",
+    1499,
+    300,
+    500,
+  ],
+  [
+    "should return a delivery fee for the 4th range's max distance ",
+    1999,
+    300,
+    700,
+  ],
 ];
 
 describe("calculateDeliveryFee", () => {
@@ -27,8 +61,8 @@ describe("calculateDeliveryFee", () => {
   });
 
   test("throws an error when delivery distance is out of range", () => {
-    expect(() => calculateDeliveryFee(distanceRanges, 2001, 190)).toThrowError(
-      "This location is outside of the delivery range (2001 m)."
+    expect(() => calculateDeliveryFee(distanceRanges, 2000, 190)).toThrowError(
+      "The delivery distance is too long (2000 m)."
     );
   });
 });

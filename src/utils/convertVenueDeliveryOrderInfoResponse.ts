@@ -1,4 +1,4 @@
-import { VenueDeliveryOrderInfoResponse } from "../types/api.types";
+import { VenueDeliveryOrderInfoResponse } from "../types/api";
 import { VenueDeliveryOrderInfo } from "../types/internal";
 
 export const convertVenueDeliveryOrderInfoResponse = (
